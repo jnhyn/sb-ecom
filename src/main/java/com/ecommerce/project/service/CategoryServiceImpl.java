@@ -1,12 +1,10 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.exceptions.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.repository.CategoryRepository;
 import java.util.List;
-import java.util.Optional;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -33,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
     Category savedCategory = categoryRepository
         .findById(categoryId)
         .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource Not Found")
+            () -> new ResourceNotFoundException("Category", "categoryId", categoryId)
         );
 
     categoryRepository.deleteById(categoryId);
@@ -42,17 +40,12 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   public Category updateCategory(Category category, Long categoryId) {
-    Optional<Category> savedCategoriesOptional = categoryRepository.findById(categoryId);
-
-    Category savedCategory = savedCategoriesOptional
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource Not Found")
-        );
+    categoryRepository.findById(categoryId)
+        .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
     category.setCategoryId(categoryId);
 
-    savedCategory = categoryRepository.save(category);
-    return savedCategory;
+    return categoryRepository.save(category);
   }
 
 
