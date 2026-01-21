@@ -3,29 +3,39 @@ package com.ecommerce.project.service;
 import com.ecommerce.project.exceptions.APIException;
 import com.ecommerce.project.exceptions.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
+import com.ecommerce.project.payload.CategoryDTO;
+import com.ecommerce.project.payload.CategoryResponse;
 import com.ecommerce.project.repository.CategoryRepository;
 import java.util.List;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-  private final CategoryRepository categoryRepository;
+  @Autowired
+  private CategoryRepository categoryRepository;
 
-  // 생성자 주입
-  public CategoryServiceImpl(CategoryRepository categoryRepository) {
-    this.categoryRepository = categoryRepository;
-  }
+  @Autowired
+  private ModelMapper modelMapper;
 
   @Override
-  public List<Category> getAllCategories() {
+  public CategoryResponse getAllCategories() {
     List<Category> categories = categoryRepository.findAll();
 
     if (categories.isEmpty()) {
       throw new ResourceNotFoundException("No category created till now");
     }
 
-    return categories;
+    List<CategoryDTO> categoryDTOS = categories.stream()
+        .map(category -> modelMapper.map(category, CategoryDTO.class))
+        .toList();
+
+    CategoryResponse categoryResponse = new CategoryResponse();
+    categoryResponse.setContent(categoryDTOS);
+
+    return categoryResponse;
   }
 
   @Override
