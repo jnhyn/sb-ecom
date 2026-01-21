@@ -22,40 +22,43 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   public CategoryResponse getAllCategories() {
-    List<Category> categories = categoryRepository.findAll();
+    List<Category> categoryList = categoryRepository.findAll();
 
-    if (categories.isEmpty()) {
+    if (categoryList.isEmpty()) {
       throw new ResourceNotFoundException("No category created till now");
     }
 
-    List<CategoryDTO> categoryDTOS = categories.stream()
+    List<CategoryDTO> categoryDtoList = categoryList.stream()
         .map(category -> modelMapper.map(category, CategoryDTO.class))
         .toList();
 
-    CategoryResponse categoryResponse = new CategoryResponse();
-    categoryResponse.setContent(categoryDTOS);
+    CategoryResponse response = new CategoryResponse();
+    response.setContent(categoryDtoList);
 
-    return categoryResponse;
+    return response;
   }
 
   @Override
-  public void createCategory(Category category) {
-    Category savedCategory = categoryRepository.findByCategoryName(category.getCategoryName());
-    if (savedCategory != null) {
+  public CategoryDTO createCategory(CategoryDTO categoryDto) {
+    Category categoryToCreate = modelMapper.map(categoryDto, Category.class);
+
+    Category existingCategory = categoryRepository.findByCategoryName(
+        categoryToCreate.getCategoryName());
+    if (existingCategory != null) {
       throw new APIException(
-          "Category with the name " + category.getCategoryName() + " already exists !!!");
+          "Category with the name " + categoryToCreate.getCategoryName() + " already exists !!!");
     }
 
-    categoryRepository.save(category);
+    Category createdCategory = categoryRepository.save(categoryToCreate);
+
+    return modelMapper.map(createdCategory, CategoryDTO.class);
   }
 
   @Override
   public String deleteCategory(Long categoryId) {
-    Category savedCategory = categoryRepository
+    categoryRepository
         .findById(categoryId)
-        .orElseThrow(
-            () -> new ResourceNotFoundException("Category", "categoryId", categoryId)
-        );
+        .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
     categoryRepository.deleteById(categoryId);
     return "Category with categoryId: " + categoryId + " deleted successfully !!";
