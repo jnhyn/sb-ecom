@@ -1,6 +1,5 @@
 package com.ecommerce.project.controller;
 
-import com.ecommerce.project.model.Category;
 import com.ecommerce.project.payload.CategoryDTO;
 import com.ecommerce.project.payload.CategoryResponse;
 import com.ecommerce.project.service.CategoryService;
@@ -43,10 +42,10 @@ public class CategoryController {
   }
 
   @PutMapping("/public/categories/{categoryId}")
-  public ResponseEntity<String> updateCategory(@Valid @RequestBody Category category,
+  public ResponseEntity<CategoryDTO> updateCategory(@Valid @RequestBody CategoryDTO categoryDto,
       @PathVariable Long categoryId) {
-    Category updatedCategory = categoryService.updateCategory(category, categoryId);
-    return new ResponseEntity<>("Saved", HttpStatus.OK);
+    CategoryDTO updatedCategory = categoryService.updateCategory(categoryDto, categoryId);
+    return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
 
   }
 }
